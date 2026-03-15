@@ -85,6 +85,8 @@ export default function Dashboard() {
               onDismiss={(id)  => dismissAchievement.mutate(id)}
               isConfirmPending={confirmAchievement.isPending}
               isDismissPending={dismissAchievement.isPending}
+              onAdd={(data) => createAchievement.mutate(data)}
+              isAddPending={createAchievement.isPending}
             />
           )}
           {activeTab === "wins" && (
@@ -144,6 +146,8 @@ function DigestTab({
   onDismiss,
   isConfirmPending,
   isDismissPending,
+  onAdd,
+  isAddPending,
 }: {
   pendingItems: Achievement[];
   isLoading: boolean;
@@ -151,15 +155,35 @@ function DigestTab({
   onDismiss: (id: number) => void;
   isConfirmPending: boolean;
   isDismissPending: boolean;
+  onAdd: (data: InsertAchievement) => void;
+  isAddPending: boolean;
 }) {
-  const today     = new Date();
-  const weekOf    = format(today, "MMM d");
-  const dow       = today.getDay();
-  let nextDigest  = "";
-  if (dow < 3)      nextDigest = "Wednesday";
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickType, setQuickType]   = useState<"win" | "constructive">("win");
+  const { toast }                   = useToast();
+
+  const today      = new Date();
+  const weekOf     = format(today, "MMM d");
+  const dow        = today.getDay();
+  let nextDigest   = "";
+  if (dow < 3)        nextDigest = "Wednesday";
   else if (dow === 3) nextDigest = "today (Wednesday)";
-  else if (dow < 5) nextDigest = "Friday";
-  else              nextDigest = "next Wednesday";
+  else if (dow < 5)   nextDigest = "Friday";
+  else                nextDigest = "next Wednesday";
+
+  const handleQuickLog = () => {
+    if (!quickTitle.trim()) {
+      toast({ variant: "destructive", title: "Nothing to save", description: "Type something first." });
+      return;
+    }
+    onAdd({
+      title: quickTitle.trim(),
+      achievementDate: format(today, "yyyy-MM-dd"),
+      feedbackType: quickType,
+      source: "self",
+    });
+    setQuickTitle("");
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -175,18 +199,75 @@ function DigestTab({
         </p>
       </div>
 
+      {/* ── Quick-log section ── */}
+      <div
+        className="rounded-2xl p-4 mb-6"
+        style={{ background: "hsl(36,40%,98%)", border: "1px solid hsl(36,20%,88%)" }}
+      >
+        <p className="text-sm font-semibold mb-3" style={{ color: "hsl(25,20%,20%)" }}>
+          What happened this week?
+        </p>
+
+        {/* Type toggle */}
+        <div className="flex gap-2 mb-3">
+          {(["win", "constructive"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setQuickType(t)}
+              className="flex-1 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+              style={{
+                background: quickType === t ? "hsl(25,55%,42%)" : "hsl(36,20%,90%)",
+                color:      quickType === t ? "white"            : "hsl(36,10%,42%)",
+              }}
+            >
+              {t === "win" ? "⭐ Win" : "💬 Feedback"}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={quickTitle}
+            onChange={e => setQuickTitle(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleQuickLog()}
+            placeholder={
+              quickType === "win"
+                ? "e.g. Shipped the onboarding flow early"
+                : "e.g. Manager said I should speak up more in meetings"
+            }
+            className="flex-1 h-10 px-3 rounded-xl text-sm outline-none"
+            style={{
+              background: "hsl(36,30%,94%)",
+              border: "1px solid hsl(36,20%,84%)",
+              color: "hsl(25,20%,16%)",
+            }}
+          />
+          <Button
+            className="h-10 px-4 rounded-xl font-semibold shrink-0"
+            style={{ background: "hsl(25,55%,42%)", color: "white" }}
+            onClick={handleQuickLog}
+            disabled={isAddPending}
+          >
+            {isAddPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+          </Button>
+        </div>
+        <p className="text-xs mt-2" style={{ color: "hsl(36,10%,58%)" }}>
+          Saved wins appear in My Wins → press Enter or tap +
+        </p>
+      </div>
+
+      {/* ── Pending digest items ── */}
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2].map(i => (
             <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: "hsl(36,20%,90%)" }} />
           ))}
         </div>
-      ) : pendingItems.length === 0 ? (
-        <EmptyDigest />
-      ) : (
-        <div className="space-y-3">
-          <p className="text-sm font-medium mb-2" style={{ color: "hsl(36,10%,48%)" }}>
-            {pendingItems.length} item{pendingItems.length !== 1 ? "s" : ""} waiting for review
+      ) : pendingItems.length > 0 && (
+        <div className="space-y-3 mb-6">
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "hsl(36,10%,52%)" }}>
+            Suggested from your tools
           </p>
           <AnimatePresence>
             {pendingItems.map(item => (
@@ -205,16 +286,14 @@ function DigestTab({
 
       {/* Info banner */}
       <div
-        className="mt-6 p-4 rounded-2xl flex gap-3 items-start"
+        className="p-4 rounded-2xl flex gap-3 items-start"
         style={{ background: "hsl(36,30%,91%)", border: "1px solid hsl(36,20%,84%)" }}
       >
         <span className="text-xl">💡</span>
         <div>
-          <p className="text-sm font-semibold" style={{ color: "hsl(25,20%,20%)" }}>How digests work</p>
+          <p className="text-sm font-semibold" style={{ color: "hsl(25,20%,20%)" }}>Auto-capture coming soon</p>
           <p className="text-xs mt-0.5" style={{ color: "hsl(36,10%,48%)" }}>
-            Every Wednesday and Friday, Career Compass surfaces wins and feedback from your connected
-            tools. Confirm items to add them to My Wins, or dismiss ones that aren't relevant.
-            Connect Gmail or Slack in Settings to enable auto-capture.
+            Connect Gmail or Slack in Settings and Career Compass will automatically surface wins and feedback from your tools every Wednesday and Friday — no manual logging needed.
           </p>
         </div>
       </div>
