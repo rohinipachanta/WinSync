@@ -27,10 +27,10 @@ async function comparePassword(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 const COACHING_LIMIT = 5;
@@ -212,20 +212,38 @@ export async function registerRoutes(
       if (!achievement) return res.status(404).json({ message: "Achievement not found" });
       if (achievement.userId !== userId) return res.sendStatus(401);
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{
-          role: "user",
-          content: `Please analyze this career achievement: "${achievement.title}".
-          Provide coaching on:
-          1. How to reframe it for maximum impact.
-          2. Specific talking points for performance reviews.
-          3. How to quantify the impact if possible.
-          Keep it professional and encouraging.`
-        }],
+      const feedbackType = achievement.feedbackType || "win";
+      const prompt = feedbackType === "constructive"
+        ? `You are a career coach helping someone grow from constructive feedback they received at work.
+
+The feedback was: "${achievement.title}"
+
+Please provide:
+1. What this feedback is really saying — translate it from vague to specific and actionable
+2. A personal action plan with 2-3 concrete things to practice
+3. How to track progress and know when it's improving
+
+Keep it warm, specific, and encouraging. Format clearly with short paragraphs.`
+        : `You are a career coach helping someone document and articulate their professional wins.
+
+The win or achievement: "${achievement.title}"
+
+Please provide:
+1. How to reframe this for maximum impact in a performance review
+2. Specific talking points that highlight the business value
+3. How to quantify or measure the impact if possible
+
+Keep it professional, specific, and confident. Format clearly with short paragraphs.`;
+
+      const response = await anthropic.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 600,
+        messages: [{ role: "user", content: prompt }],
       });
 
-      const coachingResponse = response.choices[0].message.content || "No response from AI.";
+      const coachingResponse = response.content[0].type === "text"
+        ? response.content[0].text
+        : "No response from AI.";
       await storage.updateAchievement(achievementId, coachingResponse);
       await storage.incrementCoachingCount(userId);
 
