@@ -41,8 +41,8 @@ export function useAchievements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
       toast({
-        title: "Success!",
-        description: "Achievement added to your list.",
+        title: "Saved!",
+        description: "Win added to your log.",
       });
     },
     onError: (error) => {
@@ -51,6 +51,39 @@ export function useAchievements() {
         title: "Error",
         description: error.message,
       });
+    },
+  });
+
+  const confirmAchievementMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/achievements/${id}/confirm`, {
+        method: "PATCH",
+      });
+      if (!res.ok) throw new Error("Failed to confirm");
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
+      toast({ title: "Win confirmed! 🎉", description: "Added to your wins log." });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "Error", description: "Could not confirm this item." });
+    },
+  });
+
+  const dismissAchievementMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/achievements/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to dismiss");
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "Error", description: "Could not dismiss this item." });
     },
   });
 
@@ -70,8 +103,8 @@ export function useAchievements() {
       queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Success!",
-        description: "Coaching response received.",
+        title: "Coach response ready!",
+        description: "Tap the achievement to read it.",
       });
     },
     onError: (error) => {
@@ -88,6 +121,8 @@ export function useAchievements() {
     isLoading: achievementsQuery.isLoading,
     error: achievementsQuery.error,
     createAchievement: createAchievementMutation,
+    confirmAchievement: confirmAchievementMutation,
+    dismissAchievement: dismissAchievementMutation,
     requestCoaching: requestCoachingMutation,
   };
 }

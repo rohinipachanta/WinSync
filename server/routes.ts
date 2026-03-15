@@ -246,6 +246,38 @@ Keep it professional, specific, and confident. Format clearly with short paragra
     }
   });
 
+  // Confirm a digest item (mark as confirmed)
+  app.patch("/api/achievements/:id/confirm", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const userId = (req.user as any).id;
+    const achievementId = parseInt(req.params.id);
+    try {
+      const achievement = await storage.getAchievement(achievementId);
+      if (!achievement) return res.status(404).json({ message: "Not found" });
+      if (achievement.userId !== userId) return res.sendStatus(403);
+      await storage.confirmAchievement(achievementId);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to confirm" });
+    }
+  });
+
+  // Dismiss / delete an achievement
+  app.delete("/api/achievements/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const userId = (req.user as any).id;
+    const achievementId = parseInt(req.params.id);
+    try {
+      const achievement = await storage.getAchievement(achievementId);
+      if (!achievement) return res.status(404).json({ message: "Not found" });
+      if (achievement.userId !== userId) return res.sendStatus(403);
+      await storage.deleteAchievement(achievementId);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete" });
+    }
+  });
+
   // Seed demo data
   const existingUser = await storage.getUserByUsername("demo");
   if (!existingUser) {
