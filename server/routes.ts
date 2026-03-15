@@ -27,11 +27,9 @@ async function comparePassword(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 
 const COACHING_LIMIT = 5;
 
@@ -235,15 +233,9 @@ Please provide:
 
 Keep it professional, specific, and confident. Format clearly with short paragraphs.`;
 
-      const response = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 600,
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const coachingResponse = response.content[0].type === "text"
-        ? response.content[0].text
-        : "No response from AI.";
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(prompt);
+      const coachingResponse = result.response.text() || "No response from AI.";
       await storage.updateAchievement(achievementId, coachingResponse);
       await storage.incrementCoachingCount(userId);
 
