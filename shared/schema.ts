@@ -27,7 +27,7 @@ export const achievements = pgTable("achievements", {
   coachingResponse: text("coaching_response"),
   xpEarned: integer("xp_earned").default(10).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  // Career Compass fields
+  // Winsync fields
   feedbackType: text("feedback_type").default("win").notNull(), // 'win' | 'constructive' | 'coaching'
   source: text("source").default("self").notNull(),             // 'gmail' | 'slack' | 'granola' | 'self'
   fromPerson: text("from_person"),                              // who gave the feedback

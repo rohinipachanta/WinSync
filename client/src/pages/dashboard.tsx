@@ -61,9 +61,9 @@ export default function Dashboard() {
         style={{ background: "hsl(36,33%,96%)" }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🧭</span>
+          <span className="text-2xl">⚡</span>
           <span className="font-display font-bold text-lg" style={{ color: "hsl(25,20%,16%)" }}>
-            Career Compass
+            Winsync
           </span>
         </div>
         <div
@@ -294,7 +294,7 @@ function DigestTab({
         <div>
           <p className="text-sm font-semibold" style={{ color: "hsl(25,20%,20%)" }}>Auto-capture coming soon</p>
           <p className="text-xs mt-0.5" style={{ color: "hsl(36,10%,48%)" }}>
-            Connect Gmail or Slack in Settings and Career Compass will automatically surface wins and feedback from your tools every Wednesday and Friday — no manual logging needed.
+            Connect Gmail or Slack in Settings and Winsync will automatically surface wins and feedback from your tools every Wednesday and Friday — no manual logging needed.
           </p>
         </div>
       </div>
@@ -798,7 +798,7 @@ ${filteredWins.filter(w => w.feedbackType === "constructive").length > 0
 
 GOALS FOR NEXT PERIOD
 ──────────────────────
-• Continue capturing wins regularly via Career Compass digests
+• Continue capturing wins regularly via Winsync digests
 • Build deeper impact stories around top 3 accomplishments above
 • [Add your own goal here]
 `;
@@ -1004,7 +1004,7 @@ function SettingsTab({ user, onLogout }: { user: any; onLogout: () => void }) {
             </p>
             <p className="text-xs" style={{ color: "hsl(36,10%,52%)" }}>
               Open the email in Gmail → click the label icon → apply the label{" "}
-              <code className="font-mono font-bold">career-compass</code>.
+              <code className="font-mono font-bold">winsync</code>.
               The Google Apps Script will pick it up within 15 minutes and it'll appear in This Week.
             </p>
           </div>
@@ -1014,7 +1014,7 @@ function SettingsTab({ user, onLogout }: { user: any; onLogout: () => void }) {
           {[
             { n: "1", text: "Save your Gmail address above" },
             { n: "2", text: "In Gmail, find an email with a win or feedback" },
-            { n: "3", text: 'Label it "career-compass"' },
+            { n: "3", text: 'Label it "winsync"' },
             { n: "4", text: "It appears in This Week within 15 minutes" },
           ].map(s => (
             <div key={s.n} className="flex items-center gap-3">
@@ -1087,7 +1087,7 @@ function SettingsTab({ user, onLogout }: { user: any; onLogout: () => void }) {
       </Button>
 
       <p className="text-center text-xs mt-6 mb-2" style={{ color: "hsl(36,10%,60%)" }}>
-        Career Compass · v1.0
+        Winsync · v1.0
       </p>
     </motion.div>
   );

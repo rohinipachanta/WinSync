@@ -29,8 +29,8 @@ export default function AuthPage() {
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div className="hidden md:flex flex-col justify-center space-y-6">
           <div className="flex items-center gap-3">
-            <span className="text-4xl">🧭</span>
-            <span className="text-2xl font-bold text-primary">Career Compass</span>
+            <span className="text-4xl">⚡</span>
+            <span className="text-2xl font-bold text-primary">Winsync</span>
           </div>
           <h1 className="text-5xl font-bold font-display leading-tight text-foreground">
             Never blank on <span className="text-gradient">review day</span> again.
@@ -48,8 +48,8 @@ export default function AuthPage() {
         <Card className="w-full glass-panel border-0 shadow-2xl">
           <CardHeader className="space-y-1 pb-6">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-2xl">🧭</span>
-              <CardTitle className="text-2xl font-bold">Career Compass</CardTitle>
+              <span className="text-2xl">⚡</span>
+              <CardTitle className="text-2xl font-bold">Winsync</CardTitle>
             </div>
             <CardDescription className="text-center">
               Sign in to your account or create a new one
