@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -15,6 +16,7 @@ import { sendWeeklyReminders } from "./scheduler";
 
 const scryptAsync = promisify(scrypt);
 const PostgresStore = pgSession(session);
+const MemSession = MemoryStore(session);
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -42,21 +44,32 @@ export async function registerRoutes(
   // Trust proxy for secure cookies behind Railway's reverse proxy
   app.set("trust proxy", 1);
 
-  // Setup session
+  // Version check — registered FIRST so it's always available regardless of session setup
+  app.get("/api/version", (_req, res) => {
+    res.json({ version: "2026-03-17-v6", status: "ok" });
+  });
+
+  // Setup session — try Postgres first, fall back to memory store
+  let sessionStore;
+  try {
+    sessionStore = new PostgresStore({ pool, createTableIfMissing: true });
+    console.log("[session] Using PostgresStore");
+  } catch (err: any) {
+    console.warn("[session] PostgresStore failed, using MemoryStore:", err?.message);
+    sessionStore = new MemSession({ checkPeriod: 86400000 });
+  }
+
   app.use(
     session({
-      store: new PostgresStore({
-        pool,
-        createTableIfMissing: true,
-      }),
-      secret: process.env.SESSION_SECRET || "your_secret_key",
+      store: sessionStore,
+      secret: process.env.SESSION_SECRET || "winsync_secret_key",
       resave: false,
       saveUninitialized: false,
       cookie: {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       },
     })
   );
@@ -93,11 +106,6 @@ export async function registerRoutes(
     } catch (err) {
       done(err);
     }
-  });
-
-  // Version check — tells us which build is live
-  app.get("/api/version", (_req, res) => {
-    res.json({ version: "2026-03-17-v5", status: "ok" });
   });
 
   // Auth Routes
