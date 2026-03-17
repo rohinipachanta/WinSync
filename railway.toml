@@ -1,8 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install"
+buildCommand = "npm install && npm run build"
 
 [deploy]
-startCommand = "npx tsx server/index.ts"
+startCommand = "npm run start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
