@@ -301,24 +301,30 @@ Keep it professional, specific, and confident. Format clearly with short paragra
     }
 
     try {
-      // Inbound email payload (from Google Apps Script or Postmark)
-      const rawFrom: string   = req.body?.From ?? req.body?.FromFull?.Email ?? "";
-      const subject: string   = req.body?.Subject ?? "";
-      const textBody: string  = req.body?.TextBody ?? req.body?.StrippedTextReply ?? "";
-      const htmlBody: string  = req.body?.HtmlBody ?? "";
+      // Inbound email payload (from Google Apps Script)
+      const rawFrom: string      = req.body?.From ?? req.body?.FromFull?.Email ?? "";
+      const rawUserEmail: string = req.body?.UserEmail ?? ""; // Winsync user's own Gmail
+      const subject: string      = req.body?.Subject ?? "";
+      const textBody: string     = req.body?.TextBody ?? req.body?.StrippedTextReply ?? "";
+      const htmlBody: string     = req.body?.HtmlBody ?? "";
 
       if (!rawFrom) return res.status(400).json({ message: "No sender found" });
 
-      // Extract plain email address from "Name <email@example.com>" or "email@example.com"
-      const emailMatch = rawFrom.match(/<([^>]+)>/) || rawFrom.match(/([^\s]+@[^\s]+)/);
-      const fromEmail = emailMatch ? emailMatch[1].toLowerCase().trim() : rawFrom.toLowerCase().trim();
+      // Extract plain email from "Name <email>" format
+      const extractEmail = (raw: string) => {
+        const m = raw.match(/<([^>]+)>/) || raw.match(/([^\s]+@[^\s]+)/);
+        return m ? m[1].toLowerCase().trim() : raw.toLowerCase().trim();
+      };
 
-      console.log(`Inbound email received from: ${rawFrom} → parsed: ${fromEmail}`);
+      // Use UserEmail (the person who labeled the email) for lookup
+      // This is the Winsync account owner, not the email sender
+      const lookupEmail = rawUserEmail ? extractEmail(rawUserEmail) : extractEmail(rawFrom);
+      console.log(`Inbound: From=${rawFrom} UserEmail=${rawUserEmail} lookup=${lookupEmail}`);
 
-      // Match sender to a user by stored email
-      const user = await storage.getUserByEmail(fromEmail);
+      // Match the Winsync account owner by their stored email
+      const user = await storage.getUserByEmail(lookupEmail);
       if (!user) {
-        console.log(`Inbound email from unknown sender: ${fromEmail}`);
+        console.log(`No Winsync user found for email: ${lookupEmail}`);
         return res.json({ status: "ignored", reason: "sender not found" });
       }
 
