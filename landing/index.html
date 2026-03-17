@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winsync — Own Your Career Story</title>
+  <meta name="description" content="Winsync automatically captures your professional wins from Gmail, tracks your growth, and writes your performance review for you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brown: #7B4A2D;
+      --beige: #F5EDE0;
+      --light: #FAF5EF;
+      --gold: #C8922A;
+      --dark: #2C1F14;
+      --mid: #6B5744;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,245,239,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(123,74,45,0.12);
+      padding: 0 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.2rem; color: var(--brown); text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { color: var(--mid); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--brown); }
+    .btn-primary {
+      background: var(--brown); color: var(--white);
+      padding: 10px 22px; border-radius: 8px;
+      font-weight: 600; font-size: 0.9rem;
+      text-decoration: none; transition: background 0.2s, transform 0.1s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: #5e3820; transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent; color: var(--brown);
+      padding: 10px 22px; border-radius: 8px;
+      font-weight: 600; font-size: 0.9rem; border: 2px solid var(--brown);
+      text-decoration: none; transition: all 0.2s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { background: var(--beige); }
+
+    /* HERO */
+    .hero {
+      padding: 100px 5% 80px;
+      text-align: center;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--beige); border: 1px solid rgba(123,74,45,0.2);
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 0.82rem; font-weight: 600; color: var(--brown);
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800; line-height: 1.15;
+      color: var(--dark); margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--brown); }
+    .hero p {
+      font-size: 1.15rem; color: var(--mid);
+      max-width: 580px; margin: 0 auto 36px;
+    }
+    .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .hero-ctas .btn-primary { padding: 14px 30px; font-size: 1rem; }
+    .hero-ctas .btn-secondary { padding: 14px 30px; font-size: 1rem; }
+    .hero-note { margin-top: 16px; font-size: 0.82rem; color: #9a8070; }
+
+    /* SOCIAL PROOF */
+    .proof-bar {
+      background: var(--beige);
+      border-top: 1px solid rgba(123,74,45,0.1);
+      border-bottom: 1px solid rgba(123,74,45,0.1);
+      padding: 20px 5%;
+      display: flex; justify-content: center; align-items: center;
+      gap: 40px; flex-wrap: wrap;
+      font-size: 0.85rem; color: var(--mid); font-weight: 500;
+    }
+    .proof-bar span { display: flex; align-items: center; gap: 6px; }
+
+    /* HOW IT WORKS */
+    .section { padding: 80px 5%; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--gold); text-transform: uppercase; margin-bottom: 12px;
+    }
+    .section h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800; color: var(--dark); margin-bottom: 16px;
+    }
+    .section .sub {
+      font-size: 1.05rem; color: var(--mid); max-width: 560px; margin-bottom: 52px;
+    }
+
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
+    .step {
+      background: var(--white); border-radius: 16px;
+      padding: 32px 28px;
+      border: 1px solid rgba(123,74,45,0.1);
+      box-shadow: 0 2px 12px rgba(44,31,20,0.05);
+    }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--brown); color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; margin-bottom: 16px;
+    }
+    .step h3 { font-size: 1.05rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .step p { font-size: 0.9rem; color: var(--mid); line-height: 1.6; }
+
+    /* FEATURES */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .feature-card {
+      background: var(--white); border-radius: 14px;
+      padding: 28px 24px;
+      border: 1px solid rgba(123,74,45,0.1);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .feature-card:hover { box-shadow: 0 8px 30px rgba(44,31,20,0.1); transform: translateY(-2px); }
+    .feature-icon { font-size: 1.8rem; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .feature-card p { font-size: 0.88rem; color: var(--mid); line-height: 1.6; }
+    .badge-new {
+      display: inline-block; background: #FEF3C7; color: #92400E;
+      font-size: 0.68rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 100px; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* INTEGRATIONS */
+    .integrations-section { background: var(--beige); }
+    .integrations-section .section { padding-top: 80px; padding-bottom: 80px; }
+    .integration-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+    .chip {
+      background: var(--white); border: 1px solid rgba(123,74,45,0.15);
+      padding: 8px 16px; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; color: var(--dark);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .chip.live { border-color: #16a34a; color: #15803d; background: #f0fdf4; }
+    .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+    .chip.coming { color: var(--mid); }
+
+    /* PRICING */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 800px; }
+    .pricing-card {
+      background: var(--white); border-radius: 16px;
+      padding: 32px 28px;
+      border: 1px solid rgba(123,74,45,0.1);
+    }
+    .pricing-card.featured {
+      border: 2px solid var(--brown);
+      box-shadow: 0 8px 32px rgba(123,74,45,0.15);
+    }
+    .pricing-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+    .pricing-price { font-size: 2.4rem; font-weight: 800; color: var(--dark); }
+    .pricing-price span { font-size: 1rem; font-weight: 500; color: var(--mid); }
+    .pricing-desc { font-size: 0.88rem; color: var(--mid); margin: 8px 0 20px; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .pricing-features li { font-size: 0.88rem; color: var(--dark); display: flex; align-items: flex-start; gap: 8px; }
+    .pricing-features li::before { content: "✓"; color: #16a34a; font-weight: 700; flex-shrink: 0; }
+    .pricing-cta { margin-top: 24px; width: 100%; text-align: center; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; text-decoration: none; display: block; }
+    .pricing-cta.free { background: var(--beige); color: var(--brown); }
+    .pricing-cta.pro { background: var(--brown); color: var(--white); }
+    .pricing-cta:hover { opacity: 0.9; }
+
+    /* TESTIMONIAL */
+    .quote-section { text-align: center; padding: 80px 5%; max-width: 720px; margin: 0 auto; }
+    .quote-text { font-size: clamp(1.3rem, 2.5vw, 1.8rem); font-weight: 600; color: var(--dark); line-height: 1.5; margin-bottom: 20px; }
+    .quote-text::before { content: "\201C"; color: var(--gold); }
+    .quote-text::after { content: "\201D"; color: var(--gold); }
+    .quote-author { font-size: 0.9rem; color: var(--mid); }
+
+    /* CTA */
+    .cta-section {
+      background: var(--brown);
+      padding: 80px 5%;
+      text-align: center;
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; color: var(--white); margin-bottom: 14px; }
+    .cta-section p { font-size: 1.05rem; color: rgba(255,255,255,0.8); margin-bottom: 32px; }
+    .cta-section .btn-primary { background: var(--white); color: var(--brown); font-size: 1rem; padding: 14px 32px; }
+    .cta-section .btn-primary:hover { background: var(--beige); }
+
+    /* FOOTER */
+    footer {
+      background: var(--dark); color: rgba(255,255,255,0.6);
+      padding: 40px 5%;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+      font-size: 0.85rem;
+    }
+    footer a { color: rgba(255,255,255,0.5); text-decoration: none; margin-left: 20px; }
+    footer a:hover { color: var(--white); }
+    .footer-logo { font-weight: 700; color: var(--white); font-size: 1rem; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .proof-bar { gap: 20px; }
+      footer { flex-direction: column; text-align: center; }
+      footer a { margin: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">⚡ Winsync</a>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://winsync-production-42ae.up.railway.app" class="btn-primary">Get started free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">⚡ Now with Gmail capture</div>
+  <h1>Your inbox already has<br><span>every win you've earned.</span></h1>
+  <p>Winsync automatically surfaces wins and feedback from your Gmail, tracks your professional growth, and writes your performance review — so you never blank on review day again.</p>
+  <div class="hero-ctas">
+    <a href="https://winsync-production-42ae.up.railway.app" class="btn-primary">Start for free →</a>
+    <a href="#how-it-works" class="btn-secondary">See how it works</a>
+  </div>
+  <p class="hero-note">Free forever · No credit card · 2-minute setup</p>
+</section>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <span>⚡ Gmail capture — live</span>
+  <span>🤖 AI-powered win extraction</span>
+  <span>📝 One-click self-review generator</span>
+  <span>🔒 Encrypted data storage</span>
+  <span>📱 Installable on mobile</span>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="how-it-works">
+<div class="section">
+  <p class="section-label">How it works</p>
+  <h2>Three steps to owning your career story</h2>
+  <p class="sub">Winsync works passively in the background — no habit change required.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Label an email in Gmail</h3>
+      <p>Received a compliment, positive feedback, or recognition? Apply the <strong>winsync</strong> label to it in Gmail. That's it.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>AI extracts your win</h3>
+      <p>Our AI reads the email, extracts the key achievement or feedback, and adds it to your personal Digest as a pending item.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Review day is effortless</h3>
+      <p>When review season comes, select a date range and Winsync generates a structured, polished self-review draft in seconds.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FEATURES -->
+<div id="features">
+<div class="section">
+  <p class="section-label">Features</p>
+  <h2>Everything you need.<br>Nothing you don't.</h2>
+  <p class="sub">Built for the professional who wants to own their career trajectory without adding another tool to their workflow.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📧</div>
+      <h3>Gmail Capture</h3>
+      <p>Label any email and your win is captured automatically. AI extracts the key achievement — no copy-pasting required.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✍️</div>
+      <h3>Manual Win Logger</h3>
+      <p>Log a quick win or piece of feedback in seconds. Toggle between Win and Feedback types with a single tap.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <h3>Self-Review Generator</h3>
+      <p>Select any date range and get a structured, professional self-review draft based on your actual achievements — not your memory.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI Coach Insights</h3>
+      <p>Get AI-generated coaching on each win — what it says about your strengths, and how to frame it for maximum impact.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <h3>XP & Progress Tracking</h3>
+      <p>Earn XP, unlock levels, and collect badges as you build your career history. The habit loop that keeps you logging.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Private & Encrypted</h3>
+      <p>Your achievement titles are encrypted at rest. You control exactly what gets captured — we never read your inbox uninvited.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>Install on Your Phone</h3>
+      <p>Add Winsync to your home screen for a native app experience. Log a win right after a great meeting — no browser needed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Wins Dashboard</h3>
+      <p>Filter by type, date, or source. See your wins and feedback side by side. Your entire career story, in one place.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- INTEGRATIONS -->
+<div class="integrations-section">
+<div class="section">
+  <p class="section-label">Integrations</p>
+  <h2>Capture wins wherever work happens</h2>
+  <p class="sub">Gmail is live today. More integrations are on the roadmap — every surface where your professional wins live.</p>
+  <div class="integration-chips">
+    <div class="chip live"><span class="dot"></span> Gmail</div>
+    <div class="chip coming">🔜 Slack</div>
+    <div class="chip coming">🔜 Outlook / Microsoft 365</div>
+    <div class="chip coming">🔜 Granola (meeting notes)</div>
+    <div class="chip coming">🔜 Google Calendar</div>
+    <div class="chip coming">🔜 Microsoft Teams</div>
+    <div class="chip coming">🔜 Linear / Jira</div>
+    <div class="chip coming">🔜 GitHub / GitLab</div>
+    <div class="chip coming">🔜 Notion</div>
+  </div>
+</div>
+</div>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <p class="quote-text">Your wins are already there — in your inbox, in your Slack, in your meeting notes. Winsync just makes them visible.</p>
+  <p class="quote-author">— The idea behind Winsync</p>
+</div>
+
+<!-- PRICING -->
+<div id="pricing">
+<div class="section">
+  <p class="section-label">Pricing</p>
+  <h2>Simple, honest pricing</h2>
+  <p class="sub">Start free. Upgrade when you're ready. No surprises.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <p class="pricing-label">Free</p>
+      <p class="pricing-price">$0<span> / forever</span></p>
+      <p class="pricing-desc">For professionals just getting started with tracking their wins.</p>
+      <ul class="pricing-features">
+        <li>Manual win logging</li>
+        <li>Wins & feedback dashboard</li>
+        <li>XP, levels & badges</li>
+        <li>Up to 30 wins stored</li>
+        <li>1 self-review per year</li>
+      </ul>
+      <a href="https://winsync-production-42ae.up.railway.app" class="pricing-cta free">Get started free</a>
+    </div>
+    <div class="pricing-card featured">
+      <p class="pricing-label">Pro — Coming soon</p>
+      <p class="pricing-price">$9<span> / month</span></p>
+      <p class="pricing-desc">For professionals serious about owning their career trajectory.</p>
+      <ul class="pricing-features">
+        <li>Everything in Free</li>
+        <li>Gmail capture (AI-powered)</li>
+        <li>Unlimited wins stored</li>
+        <li>Unlimited self-reviews</li>
+        <li>AI coach on every win</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="https://winsync-production-42ae.up.railway.app" class="pricing-cta pro">Join the waitlist →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Start capturing your wins today.</h2>
+  <p>Free to use. Takes 2 minutes to set up. Your future self will thank you at review time.</p>
+  <a href="https://winsync-production-42ae.up.railway.app" class="btn-primary">Create your free account →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <span class="footer-logo">⚡ Winsync</span>
+    <span style="margin-left:12px">© 2026 Rohini Achanta</span>
+  </div>
+  <div>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="mailto:rohini.p.achanta@gmail.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
