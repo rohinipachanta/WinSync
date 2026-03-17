@@ -378,9 +378,9 @@ Rules:
 
       console.log(`Inbound win logged for user ${user.username}: ${parsed.title}`);
       res.json({ status: "ok", title: parsed.title });
-    } catch (err) {
-      console.error("Inbound email error:", err);
-      res.status(500).json({ message: "Failed to process email" });
+    } catch (err: any) {
+      console.error("Inbound email error:", err?.message ?? err);
+      res.status(500).json({ message: "Failed to process email", detail: err?.message ?? String(err) });
     }
   });
 
