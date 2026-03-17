@@ -351,6 +351,34 @@ Keep it professional, specific, and confident. Format clearly with short paragra
     }
   });
 
+  // Get dismissed (soft-deleted) achievements for the current user
+  app.get("/api/achievements/dismissed", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const dismissed = await storage.getDismissedAchievements((req.user as any).id);
+      res.json(dismissed);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch dismissed items" });
+    }
+  });
+
+  // Restore a previously dismissed achievement
+  app.post("/api/achievements/:id/restore", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const userId = (req.user as any).id;
+    const achievementId = parseInt(req.params.id);
+    try {
+      const achievement = await storage.getAchievement(achievementId);
+      // getAchievement doesn't filter by dismissedAt — that's fine for restore
+      if (!achievement) return res.status(404).json({ message: "Not found" });
+      if (achievement.userId !== userId) return res.sendStatus(403);
+      await storage.restoreAchievement(achievementId);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to restore" });
+    }
+  });
+
   // Update the logged-in user's email address
   app.patch("/api/user/email", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

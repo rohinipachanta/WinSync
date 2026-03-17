@@ -33,6 +33,7 @@ export const achievements = pgTable("achievements", {
   source: text("source").default("self").notNull(),             // 'gmail' | 'slack' | 'granola' | 'self'
   fromPerson: text("from_person"),                              // who gave the feedback
   isConfirmed: integer("is_confirmed").default(1).notNull(),    // 1 = confirmed, 0 = pending digest
+  dismissedAt: timestamp("dismissed_at"),                       // null = active, set = soft-deleted
 });
 
 export const insertUserSchema = createInsertSchema(users);

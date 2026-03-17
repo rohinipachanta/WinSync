@@ -75,17 +75,43 @@ export function useAchievements() {
 
   const dismissAchievementMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/achievements/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/achievements/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to dismiss");
       return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements/dismissed"] });
     },
     onError: () => {
       toast({ variant: "destructive", title: "Error", description: "Could not dismiss this item." });
+    },
+  });
+
+  const dismissedQuery = useQuery({
+    queryKey: ["/api/achievements/dismissed"],
+    queryFn: async () => {
+      const res = await fetch("/api/achievements/dismissed");
+      if (!res.ok) throw new Error("Failed to fetch dismissed items");
+      return await res.json() as typeof achievementsQuery.data;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
+  });
+
+  const restoreAchievementMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/achievements/${id}/restore`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to restore");
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.achievements.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements/dismissed"] });
+      toast({ title: "Restored!", description: "Item moved back to your wins." });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "Error", description: "Could not restore this item." });
     },
   });
 
@@ -146,5 +172,8 @@ export function useAchievements() {
     dismissAchievement: dismissAchievementMutation,
     editAchievement: editAchievementMutation,
     requestCoaching: requestCoachingMutation,
+    dismissedAchievements: dismissedQuery.data ?? [],
+    isDismissedLoading: dismissedQuery.isLoading,
+    restoreAchievement: restoreAchievementMutation,
   };
 }

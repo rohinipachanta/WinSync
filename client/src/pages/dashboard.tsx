@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from "@/components/ui/form";
 import {
-  LogOut, Plus, Calendar, Loader2, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Pencil, Trash2, Check
+  LogOut, Plus, Calendar, Loader2, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Pencil, Trash2, Check, RotateCcw, Archive
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -33,6 +33,8 @@ export default function Dashboard() {
     dismissAchievement,
     editAchievement,
     requestCoaching,
+    dismissedAchievements,
+    restoreAchievement,
   } = useAchievements();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>("digest");
@@ -104,6 +106,9 @@ export default function Dashboard() {
               onEdit={(id, title, feedbackType, achievementDate) =>
                 editAchievement.mutate({ id, title, feedbackType, achievementDate })}
               onDelete={(id) => dismissAchievement.mutate(id)}
+              dismissedItems={dismissedAchievements}
+              onRestore={(id) => restoreAchievement.mutate(id)}
+              isRestorePending={restoreAchievement.isPending}
             />
           )}
           {activeTab === "review" && (
@@ -417,6 +422,9 @@ function WinsTab({
   coachingVariable,
   onEdit,
   onDelete,
+  dismissedItems,
+  onRestore,
+  isRestorePending,
 }: {
   confirmedWins: Achievement[];
   isLoading: boolean;
@@ -427,6 +435,9 @@ function WinsTab({
   coachingVariable: number | undefined;
   onEdit: (id: number, title: string, feedbackType: string, achievementDate: string) => void;
   onDelete: (id: number) => void;
+  dismissedItems: Achievement[];
+  onRestore: (id: number) => void;
+  isRestorePending: boolean;
 }) {
   const [filter, setFilter]     = useState<WinFilter>("all");
   const [showForm, setShowForm] = useState(false);
@@ -548,7 +559,109 @@ function WinsTab({
           </AnimatePresence>
         </div>
       )}
+
+      {/* ── Dismissed / archived items ── */}
+      <DismissedSection
+        items={dismissedItems}
+        onRestore={onRestore}
+        isRestorePending={isRestorePending}
+      />
     </motion.div>
+  );
+}
+
+// ─── Dismissed section ───────────────────────────────────────────────────────
+function DismissedSection({
+  items,
+  onRestore,
+  isRestorePending,
+}: {
+  items: Achievement[];
+  onRestore: (id: number) => void;
+  isRestorePending: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  if (items.length === 0) return null;
+
+  const typeLabel: Record<string, { bg: string; text: string; label: string }> = {
+    win:          { bg: "#dcfce7", text: "#166534", label: "Win"      },
+    constructive: { bg: "#fef9c3", text: "#854d0e", label: "Feedback" },
+    coaching:     { bg: "#dbeafe", text: "#1e40af", label: "Coaching" },
+  };
+
+  return (
+    <div className="mt-6">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 w-full text-left py-2"
+      >
+        <Archive className="w-3.5 h-3.5" style={{ color: "hsl(36,10%,52%)" }} />
+        <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "hsl(36,10%,52%)" }}>
+          Dismissed ({items.length})
+        </span>
+        {open
+          ? <ChevronUp  className="w-3.5 h-3.5 ml-auto" style={{ color: "hsl(36,10%,52%)" }} />
+          : <ChevronDown className="w-3.5 h-3.5 ml-auto" style={{ color: "hsl(36,10%,52%)" }} />}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden space-y-2 mt-1"
+          >
+            {items.map(item => {
+              const colours = typeLabel[item.feedbackType ?? "win"] ?? typeLabel.win;
+              const displayDate = item.achievementDate
+                ? format(new Date(item.achievementDate + "T00:00:00"), "MMM d, yyyy")
+                : "";
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-2xl p-3 flex items-start gap-3"
+                  style={{
+                    background: "hsl(36,25%,93%)",
+                    border: "1px solid hsl(36,20%,86%)",
+                    opacity: 0.85,
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: colours.bg, color: colours.text }}
+                    >
+                      {colours.label}
+                    </span>
+                    <p className="text-sm font-medium leading-snug mt-1.5 line-clamp-2"
+                       style={{ color: "hsl(25,15%,30%)" }}>
+                      {item.title}
+                    </p>
+                    <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "hsl(36,10%,56%)" }}>
+                      <Calendar className="w-3 h-3" />
+                      {displayDate}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 rounded-xl text-xs font-semibold shrink-0"
+                    style={{ borderColor: "hsl(36,20%,78%)", color: "hsl(25,40%,38%)" }}
+                    onClick={() => onRestore(item.id)}
+                    disabled={isRestorePending}
+                    title="Restore this item"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Restore
+                  </Button>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 

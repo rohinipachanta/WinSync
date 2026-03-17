@@ -22,6 +22,10 @@ export async function runMigrations() {
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS weekly_reminder boolean NOT NULL DEFAULT false;
     `);
+    await client.query(`
+      ALTER TABLE achievements
+        ADD COLUMN IF NOT EXISTS dismissed_at TIMESTAMP;
+    `);
     console.log("[db] Migrations applied.");
   } catch (err: any) {
     // Log clearly but don't throw — startup continues even if migration fails.

@@ -1,6 +1,6 @@
 import { users, achievements, badges, type User, type InsertUser, type Achievement, type InsertAchievement, type Badge, type InsertBadge } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, isNull, isNotNull } from "drizzle-orm";
 import { encryptText, decryptText } from "./encryption";
 
 export interface IStorage {
@@ -8,12 +8,14 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getAchievements(userId: number): Promise<Achievement[]>;
+  getDismissedAchievements(userId: number): Promise<Achievement[]>;
   createAchievement(userId: number, achievement: InsertAchievement): Promise<Achievement>;
   getAchievement(id: number): Promise<Achievement | undefined>;
   updateAchievement(id: number, coachingResponse: string): Promise<void>;
   editAchievement(id: number, title: string, feedbackType: string, achievementDate: string): Promise<void>;
   confirmAchievement(id: number): Promise<void>;
-  deleteAchievement(id: number): Promise<void>;
+  deleteAchievement(id: number): Promise<void>;   // soft-delete (sets dismissed_at)
+  restoreAchievement(id: number): Promise<void>;  // clears dismissed_at
   incrementCoachingCount(userId: number): Promise<number>;
   updateUserPassword(id: number, password: string): Promise<void>;
   updateUserEmail(id: number, email: string): Promise<void>;
@@ -44,7 +46,7 @@ export class DatabaseStorage implements IStorage {
     const rawAchievements = await db
       .select()
       .from(achievements)
-      .where(eq(achievements.userId, userId))
+      .where(sql`${achievements.userId} = ${userId} AND ${achievements.dismissedAt} IS NULL`)
       .orderBy(desc(achievements.achievementDate), desc(achievements.id));
     
     // Decrypt achievement titles
@@ -117,14 +119,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAchievement(id: number): Promise<Achievement | undefined> {
+    // NOTE: does NOT filter by dismissedAt — this lets the restore route find dismissed items
     const [achievement] = await db.select().from(achievements).where(eq(achievements.id, id));
     if (!achievement) return undefined;
-    
-    // Decrypt achievement title
-    return {
-      ...achievement,
-      title: await decryptText(achievement.title),
-    };
+    return { ...achievement, title: await decryptText(achievement.title) };
   }
 
   async updateAchievement(id: number, coachingResponse: string): Promise<void> {
@@ -142,8 +140,24 @@ export class DatabaseStorage implements IStorage {
     await db.update(achievements).set({ isConfirmed: 1 }).where(eq(achievements.id, id));
   }
 
+  async getDismissedAchievements(userId: number): Promise<Achievement[]> {
+    const rawAchievements = await db
+      .select()
+      .from(achievements)
+      .where(sql`${achievements.userId} = ${userId} AND ${achievements.dismissedAt} IS NOT NULL`)
+      .orderBy(desc(achievements.dismissedAt));
+    return Promise.all(
+      rawAchievements.map(async (a) => ({ ...a, title: await decryptText(a.title) }))
+    );
+  }
+
   async deleteAchievement(id: number): Promise<void> {
-    await db.delete(achievements).where(eq(achievements.id, id));
+    // Soft-delete: set dismissed_at so the item can be restored later
+    await db.update(achievements).set({ dismissedAt: new Date() }).where(eq(achievements.id, id));
+  }
+
+  async restoreAchievement(id: number): Promise<void> {
+    await db.update(achievements).set({ dismissedAt: null }).where(eq(achievements.id, id));
   }
 
   async incrementCoachingCount(userId: number): Promise<number> {
