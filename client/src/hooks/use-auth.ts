@@ -26,13 +26,11 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        if (res.status === 401) {
-          throw new Error("Invalid username or password");
-        }
-        throw new Error("Login failed");
+        throw new Error(data?.message ?? (res.status === 401 ? "Invalid username or password" : "Login failed"));
       }
-      return api.auth.login.responses[200].parse(await res.json());
+      return api.auth.login.responses[200].parse(data);
     },
     onSuccess: (user) => {
       queryClient.setQueryData([api.auth.user.path], user);
@@ -58,13 +56,11 @@ export function useAuth() {
         body: JSON.stringify(credentials),
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        if (res.status === 409) {
-          throw new Error("Username already exists");
-        }
-        throw new Error("Registration failed");
+        throw new Error(data?.message ?? (res.status === 409 ? "Username already exists" : "Registration failed"));
       }
-      return api.auth.register.responses[201].parse(await res.json());
+      return api.auth.register.responses[201].parse(data);
     },
     onSuccess: (user) => {
       // Server already calls req.login() during registration, session is live.

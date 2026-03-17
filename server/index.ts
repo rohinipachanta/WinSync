@@ -62,7 +62,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await runMigrations();
+  // Non-fatal — if the migration fails the server still starts
+  try {
+    await runMigrations();
+  } catch (err: any) {
+    console.error("[startup] Migration failed (non-fatal):", err?.message ?? err);
+  }
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

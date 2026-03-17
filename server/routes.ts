@@ -106,22 +106,39 @@ export async function registerRoutes(
       const input = api.auth.register.input.parse(req.body);
       const hashedPassword = await hashPassword(input.password);
       const user = await storage.createUser({ ...input, password: hashedPassword });
-      
+
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json({ id: user.id, username: user.username });
+        // Return full user so the client cache is fully populated
+        res.status(201).json(user);
       });
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      next(err);
+      console.error("[register] error:", err?.message ?? err);
+      res.status(500).json({ message: err?.message ?? "Registration failed" });
     }
   });
 
-  app.post(api.auth.login.path, passport.authenticate("local"), (req, res) => {
-    const user = req.user as any;
-    res.status(200).json({ id: user.id, username: user.username });
+  app.post(api.auth.login.path, (req, res, next) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
+      if (err) {
+        console.error("[login] passport error:", err?.message ?? err);
+        return res.status(500).json({ message: err?.message ?? "Login error" });
+      }
+      if (!user) {
+        return res.status(401).json({ message: info?.message ?? "Invalid username or password" });
+      }
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("[login] req.login error:", loginErr?.message ?? loginErr);
+          return res.status(500).json({ message: loginErr?.message ?? "Login failed" });
+        }
+        // Return full user so the client cache is fully populated
+        res.status(200).json(user);
+      });
+    })(req, res, next);
   });
 
   app.post(api.auth.logout.path, (req, res, next) => {
