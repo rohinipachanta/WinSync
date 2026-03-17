@@ -14,6 +14,8 @@ export function useAchievements() {
       if (!res.ok) throw new Error("Failed to fetch achievements");
       return api.achievements.list.responses[200].parse(await res.json());
     },
+    refetchInterval: 30000,       // auto-refresh every 30 seconds
+    refetchOnWindowFocus: true,   // refresh when user switches back to the tab
   });
 
   const createAchievementMutation = useMutation({
