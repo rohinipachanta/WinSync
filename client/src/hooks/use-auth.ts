@@ -66,15 +66,8 @@ export function useAuth() {
       }
       return api.auth.register.responses[201].parse(await res.json());
     },
-    onSuccess: (user) => {
-      // Auto login after register typically, or redirect to login.
-      // Based on typical flows, we might want to log them in automatically.
-      // Assuming the backend sets the session on register (common practice)
-      // If not, we would trigger login. Let's assume standard behavior:
-      // If backend creates session on register, update cache.
-      // If backend requires separate login, we'd do that.
-      // For this app, let's assume register logs you in or we'll trigger login next.
-      // Actually, simplest is to just login immediately.
+    onSuccess: (_user, credentials) => {
+      // Auto-login immediately after successful registration
       loginMutation.mutate(credentials);
     },
     onError: (error) => {
