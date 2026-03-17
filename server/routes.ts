@@ -233,7 +233,7 @@ Please provide:
 
 Keep it professional, specific, and confident. Format clearly with short paragraphs.`;
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const result = await model.generateContent(prompt);
       const coachingResponse = result.response.text() || "No response from AI.";
       await storage.updateAchievement(achievementId, coachingResponse);
@@ -338,7 +338,7 @@ Keep it professional, specific, and confident. Format clearly with short paragra
       }
 
       // Use Gemini to extract a win or feedback from the email
-      const model  = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model  = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const prompt = `You are a career tracking assistant. Someone forwarded this email to their Winsync app to log a win or feedback.
 
 Email content:
