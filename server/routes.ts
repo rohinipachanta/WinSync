@@ -46,7 +46,7 @@ export async function registerRoutes(
 
   // Version check — registered FIRST so it's always available regardless of session setup
   app.get("/api/version", (_req, res) => {
-    res.json({ version: "2026-03-17-v9", status: "ok" });
+    res.json({ version: "2026-03-17-v10", status: "ok" });
   });
 
   // Setup session — try Postgres first, fall back to memory store

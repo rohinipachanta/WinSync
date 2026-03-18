@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from "
 import {
   LogOut, Plus, Calendar, Loader2, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Pencil, Trash2, Check, RotateCcw, Archive, HelpCircle, Clock, BookOpen, PackageOpen
 } from "lucide-react";
+import { GoalsManager } from "@/components/goals-manager";
+import { GoalSelector } from "@/components/goal-selector";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -539,6 +541,9 @@ function WinsTab({
         ))}
       </div>
 
+      {/* Goals section */}
+      <GoalsManager />
+
       {/* Log win form */}
       <AnimatePresence>
         {showForm && (
@@ -939,6 +944,7 @@ function WinCard({
 }
 
 function LogWinForm({ onSubmit, isPending }: { onSubmit: (data: InsertAchievement) => void; isPending: boolean }) {
+  const [selectedGoalIds, setSelectedGoalIds] = useState<number[]>([]);
   const form = useForm<InsertAchievement>({
     resolver: zodResolver(insertAchievementSchema),
     defaultValues: {
@@ -949,9 +955,10 @@ function LogWinForm({ onSubmit, isPending }: { onSubmit: (data: InsertAchievemen
     },
   });
 
-  const handleSubmit = (data: InsertAchievement) => {
+  const handleSubmit = async (data: InsertAchievement) => {
     onSubmit(data);
     form.reset({ title: "", achievementDate: format(new Date(), "yyyy-MM-dd"), feedbackType: "win", source: "self" });
+    setSelectedGoalIds([]);
   };
 
   return (
@@ -1035,6 +1042,8 @@ function LogWinForm({ onSubmit, isPending }: { onSubmit: (data: InsertAchievemen
             </FormItem>
           )}
         />
+        <div className="border-t" style={{ borderColor: "hsl(36,20%,88%)" }}></div>
+        <GoalSelector selectedGoalIds={selectedGoalIds} onChange={setSelectedGoalIds} />
         <Button
           type="submit"
           className="w-full h-10 rounded-xl font-semibold"
