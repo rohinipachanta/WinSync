@@ -1691,28 +1691,33 @@ function HowItWorksModal({ open, onClose }: { open: boolean; onClose: () => void
   const steps = [
     {
       emoji: "📅",
-      title: "This Week",
-      desc: "Your home base. Log wins and feedback on the fly — type it in and press Enter. Once you connect Gmail or Slack, suggested items from your tools will appear here every Wednesday and Friday for you to confirm or dismiss.",
+      title: "This Week — your capture inbox",
+      desc: "Log wins and feedback on the fly by typing them in and pressing Enter. Once you connect Gmail or Slack, suggestions from your real work appear here every Wednesday and Friday to confirm or dismiss.",
     },
     {
       emoji: "🏆",
-      title: "My Wins",
-      desc: "All your confirmed wins in one place. Filter by type, edit anything, or tap Coach to get personalised AI feedback. Deleted items move to a recoverable Dismissed section at the bottom — nothing is lost permanently.",
+      title: "My Wins — your career story",
+      desc: "All your confirmed wins in one place. Filter by type, edit anything, request AI coaching, or tag wins to your goals. Dismissed items are never deleted — they sit in a recoverable section at the bottom.",
+    },
+    {
+      emoji: "🎯",
+      title: "Goals — stay on track",
+      desc: "Set 3–5 goals for the year (e.g. 'Get promoted', 'Ship new product line'). Tag each win to the goals it supports. If you haven't logged progress on a goal in 60+ days, you'll get a nudge on the My Wins tab.",
     },
     {
       emoji: "✦",
-      title: "Self Review",
-      desc: "When review season arrives, hit Generate to turn your wins into a first-draft self-review. Polish it with AI, regenerate, or write one from scratch — then copy and paste it wherever you need it.",
+      title: "Self Review — never start from scratch",
+      desc: "Your draft auto-saves across devices as you write. When you're ready, hit Generate to turn your wins into a first-draft self-review, then polish it with AI or edit it yourself. Copy and paste it wherever you need it.",
+    },
+    {
+      emoji: "📦",
+      title: "Wrap up a season — start fresh anytime",
+      desc: "When a review cycle ends, hit 'Wrap up this season' in My Wins. Name the season, choose what to do with your goals, and everything gets archived to Past Reviews. You start completely fresh.",
     },
     {
       emoji: "⚙️",
-      title: "Settings",
-      desc: "Save your email address to receive weekly Monday morning recap emails. Connect Gmail or Slack (coming soon) to start auto-capturing wins from your real work.",
-    },
-    {
-      emoji: "✏️",
-      title: "Log manually anytime",
-      desc: "No integrations needed to start. Just type a win or piece of feedback in This Week or My Wins and tap +. Your career story builds entry by entry.",
+      title: "Settings — personalise your experience",
+      desc: "Fill in your Career Profile (role, team, career goal) to help the app tailor itself to you. Save your email to get weekly Monday recap emails. The more context you give, the more useful Winsync becomes.",
     },
   ];
 
@@ -1730,7 +1735,7 @@ function HowItWorksModal({ open, onClose }: { open: boolean; onClose: () => void
             </DialogTitle>
           </div>
           <p className="text-sm" style={{ color: "hsl(36,10%,50%)" }}>
-            Five things to know before you dive in.
+            Six things to know before you dive in.
           </p>
         </DialogHeader>
 
