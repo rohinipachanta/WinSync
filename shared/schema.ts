@@ -36,7 +36,10 @@ export const achievements = pgTable("achievements", {
   dismissedAt: timestamp("dismissed_at"),                       // null = active, set = soft-deleted
 });
 
-export const insertUserSchema = createInsertSchema(users);
+export const insertUserSchema = createInsertSchema(users, {
+  // Enforce minimum password length on both client and server
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 export const insertAchievementSchema = createInsertSchema(achievements).pick({
   title: true,
   achievementDate: true,

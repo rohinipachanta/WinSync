@@ -11,12 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from "@/components/ui/form";
 import {
-  LogOut, Plus, Calendar, Loader2, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Pencil, Trash2, Check, RotateCcw, Archive
+  LogOut, Plus, Calendar, Loader2, CheckCircle2, X, ChevronDown, ChevronUp, Sparkles, Pencil, Trash2, Check, RotateCcw, Archive, HelpCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // ─── Tab types ──────────────────────────────────────────────────────────────
 type Tab = "digest" | "wins" | "review" | "settings";
@@ -38,6 +39,15 @@ export default function Dashboard() {
   } = useAchievements();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>("digest");
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Show "How it works" automatically on very first login
+  useEffect(() => {
+    if (user && !localStorage.getItem("winsync_onboarding_seen")) {
+      setShowHelp(true);
+      localStorage.setItem("winsync_onboarding_seen", "1");
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -69,13 +79,26 @@ export default function Dashboard() {
             Winsync
           </span>
         </div>
-        <div
-          className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold"
-          style={{ background: "hsl(36,20%,88%)", color: "hsl(25,40%,35%)" }}
-        >
-          ⭐ {user.xp ?? 0} XP · Lv {user.level ?? 1}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHelp(true)}
+            className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            style={{ background: "hsl(36,20%,88%)", color: "hsl(25,40%,38%)" }}
+            title="How it works"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+          <div
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold"
+            style={{ background: "hsl(36,20%,88%)", color: "hsl(25,40%,35%)" }}
+          >
+            ⭐ {user.xp ?? 0} XP · Lv {user.level ?? 1}
+          </div>
         </div>
       </header>
+
+      {/* How it works modal */}
+      <HowItWorksModal open={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* Page content */}
       <main className="flex-1 overflow-y-auto px-4 pb-28">
@@ -1489,6 +1512,89 @@ function SettingsTab({ user, onLogout }: { user: any; onLogout: () => void }) {
         Winsync · v1.0
       </p>
     </motion.div>
+  );
+}
+
+// ─── How it works modal ───────────────────────────────────────────────────────
+function HowItWorksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const steps = [
+    {
+      emoji: "📅",
+      title: "This Week",
+      desc: "Your home base. Log wins and feedback on the fly — type it in and press Enter. Once you connect Gmail or Slack, suggested items from your tools will appear here every Wednesday and Friday for you to confirm or dismiss.",
+    },
+    {
+      emoji: "🏆",
+      title: "My Wins",
+      desc: "All your confirmed wins in one place. Filter by type, edit anything, or tap Coach to get personalised AI feedback. Deleted items move to a recoverable Dismissed section at the bottom — nothing is lost permanently.",
+    },
+    {
+      emoji: "✦",
+      title: "Self Review",
+      desc: "When review season arrives, hit Generate to turn your wins into a first-draft self-review. Polish it with AI, regenerate, or write one from scratch — then copy and paste it wherever you need it.",
+    },
+    {
+      emoji: "⚙️",
+      title: "Settings",
+      desc: "Save your email address to receive weekly Monday morning recap emails. Connect Gmail or Slack (coming soon) to start auto-capturing wins from your real work.",
+    },
+    {
+      emoji: "✏️",
+      title: "Log manually anytime",
+      desc: "No integrations needed to start. Just type a win or piece of feedback in This Week or My Wins and tap +. Your career story builds entry by entry.",
+    },
+  ];
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent
+        className="max-w-sm rounded-3xl p-0 overflow-hidden"
+        style={{ background: "hsl(36,33%,96%)", border: "1px solid hsl(36,20%,86%)" }}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-2xl">⚡</span>
+            <DialogTitle className="text-xl font-display font-bold" style={{ color: "hsl(25,20%,16%)" }}>
+              How Winsync works
+            </DialogTitle>
+          </div>
+          <p className="text-sm" style={{ color: "hsl(36,10%,50%)" }}>
+            Five things to know before you dive in.
+          </p>
+        </DialogHeader>
+
+        <div className="px-6 pb-2 space-y-4 max-h-[60vh] overflow-y-auto">
+          {steps.map((s, i) => (
+            <div key={i} className="flex gap-3 items-start">
+              <div
+                className="flex items-center justify-center w-9 h-9 rounded-2xl shrink-0 text-lg"
+                style={{ background: "hsl(36,30%,92%)" }}
+              >
+                {s.emoji}
+              </div>
+              <div>
+                <p className="text-sm font-semibold mb-0.5" style={{ color: "hsl(25,20%,16%)" }}>
+                  {s.title}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: "hsl(36,10%,48%)" }}>
+                  {s.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-6 pb-6 pt-4">
+          <Button
+            className="w-full h-11 rounded-2xl font-semibold text-sm"
+            style={{ background: "hsl(25,55%,42%)", color: "white" }}
+            onClick={onClose}
+          >
+            Got it, let's go ⚡
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

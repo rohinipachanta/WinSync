@@ -235,6 +235,11 @@ function AuthForm({
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} className="bg-white/50" />
               </FormControl>
+              {mode === "register" && (
+                <p className="text-xs text-muted-foreground">
+                  At least 6 characters
+                </p>
+              )}
               <FormMessage />
             </FormItem>
           )}
